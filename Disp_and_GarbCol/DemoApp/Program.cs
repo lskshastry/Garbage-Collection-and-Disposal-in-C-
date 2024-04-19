@@ -1,83 +1,111 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-/*
- This is a rough demo code made using AI to gain a basic understanding of the topic and showcase it.
- AI was used due to a lack of time as midterms were going on. 
- We'll be further developing this over spring break and before the class presentation to show the 
- actual usage and provide an understanding on the code.
- */
-
 using System;
+using System.Collections.Generic;
 
-// A class that implements IDisposable
-public class DemoResource : IDisposable
+public static class GarbageCollectionHelper
 {
-    private bool disposed = false;
-
-    // Resource-intensive operation in the constructor
-    public DemoResource()
+    public static void PrintGCStatus(bool invoked)
     {
-        Console.WriteLine("DemoResource created.");
+        string status = invoked ? "invoked" : "not invoked";
+        Console.WriteLine($"Garbage collection: {status}");
     }
 
-    // Method to simulate a resource-intensive operation
-    public void PerformOperation()
+    public static bool CheckGCStatus()
     {
-        if (disposed)
-            throw new ObjectDisposedException(nameof(DemoResource));
+        // Create some objects to generate garbage
+        var temp = new byte[1024];
+        temp = null;
 
-        Console.WriteLine("Performing operation with DemoResource.");
+        // Ensure these objects are collected
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+
+        // Check if garbage collection is invoked
+        return GC.GetTotalMemory(false) > 0;
     }
+}
 
-    // Implementation of IDisposable
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
 
-    // Custom disposal logic
-    protected virtual void Dispose(bool disposing)
+
+class CarManagementWithoutGC
+{
+    class Car
     {
-        if (!disposed)
+        public string Make { get; set; }
+        public string Model { get; set; }
+        public int Year { get; set; }
+        public string Color { get; set; }
+        public double Price { get; set; }
+
+        public Car(string make, string model, int year, string color, double price)
         {
-            if (disposing)
-            {
-                // Dispose managed resources
-                Console.WriteLine("Disposing managed resources.");
-            }
-
-            // Dispose unmanaged resources
-            Console.WriteLine("Disposing unmanaged resources.");
-
-            disposed = true;
+            Make = make;
+            Model = model;
+            Year = year;
+            Color = color;
+            Price = price;
         }
     }
 
-    // Destructor as a safeguard
-    ~DemoResource()
+    static void Main(string[] args)
     {
-        Dispose(false);
-        Console.WriteLine("DemoResource finalized.");
-    }
-}
+        List<Car> cars = new List<Car>();
+        const int numCars = 100000; // Number of cars to create
 
-class Program
-{
-    static void Main()
-    {
-        // Creating a DemoResource instance
-        using (DemoResource demoResource = new DemoResource())
+        for (int i = 0; i < numCars; i++)
         {
-            // Using the resource
-            demoResource.PerformOperation();
-        } // The Dispose method is automatically called when leaving the using block
+            Car car = new Car("Toyota", "Camry", 2020, "Red", 25000.00);
+            cars.Add(car);
+            Console.WriteLine($"Car added: {car.Make} {car.Model} {car.Year}");
+        }
 
-        Console.WriteLine("After leaving the using block.");
-
-        // Uncomment the line below to see the impact of not disposing the resource
-        //DemoResource resourceWithoutDisposal = new DemoResource();
-
-        Console.WriteLine("End of Main method.");
+        // Print the status indicating that garbage collection was not invoked
+        GarbageCollectionHelper.PrintGCStatus(false);
     }
 }
+
+
+
+
+/*
+class CarManagementWithGC
+{
+    class Car
+    {
+        public string Make { get; set; }
+        public string Model { get; set; }
+        public int Year { get; set; }
+        public string Color { get; set; }
+        public double Price { get; set; }
+
+        public Car(string make, string model, int year, string color, double price)
+        {
+            Make = make;
+            Model = model;
+            Year = year;
+            Color = color;
+            Price = price;
+        }
+    }
+
+    static void Main(string[] args)
+    {
+        List<Car> cars = new List<Car>();
+        const int numCars = 10000; // Number of cars to create
+
+        for (int i = 0; i < numCars; i++)
+        {
+            Car car = new Car("Toyota", "Camry", 2020, "Red", 25000.00);
+            cars.Add(car);
+            Console.WriteLine($"Car added: {car.Make} {car.Model} {car.Year}");
+
+            // Check if garbage collection is invoked
+            bool invoked = GarbageCollectionHelper.CheckGCStatus();
+            GarbageCollectionHelper.PrintGCStatus(invoked);
+        }
+    }
+}
+
+*/
