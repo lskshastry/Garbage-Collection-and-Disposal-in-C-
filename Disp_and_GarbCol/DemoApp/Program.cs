@@ -120,8 +120,8 @@ class Program
         ICarManagement carManagement;
 
         // Uncomment the line corresponding to the desired behavior
-        carManagement = new CarManager2();
-        //carManagement = new CarManager1();
+        //carManagement = new CarManager2();
+        carManagement = new CarManager1();
 
         carManagement.ManageCars();
     }
