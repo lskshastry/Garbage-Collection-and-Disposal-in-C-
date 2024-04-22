@@ -1,99 +1,88 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+// Garbage Collection and Disposal - Code Demo
+// Andrew McGann & Lalith Shashwath Krishna Shastry
+// Cpt_S 321
+
 using System;
 using System.Collections.Generic;
 
-public interface ICarManagement
+public interface ICarManagement : IDisposable
 {
     void ManageCars();
 }
 
-public class CarManager2 : ICarManagement
-{
-    class Car
-    {
-        public string Make { get; set; }
-        public string Model { get; set; }
-        public int Year { get; set; }
-        public string Color { get; set; }
-        public double Price { get; set; }
-
-        public Car(string make, string model, int year, string color, double price)
-        {
-            Make = make;
-            Model = model;
-            Year = year;
-            Color = color;
-            Price = price;
-        }
-    }
-
-    public void ManageCars()
-    {
-        List<Car> cars = new List<Car>();
-        const int numCars = 1000000; // Number of cars to create
-
-        for (int i = 0; i < numCars; i++)
-        {
-            Car car = new Car("Toyota", "Camry", 2020, "Red", 25000.00);
-            cars.Add(car);
-            Console.WriteLine($"Car added: {car.Make} {car.Model} {car.Year}");
-        }
-
-        // Print the status indicating that garbage collection was not invoked
-        GarbageCollectionHelper.PrintGCStatus(false);
-    }
-}
-
 public class CarManager1 : ICarManagement
 {
+    private List<Car> cars;
+
     class Car
     {
+        public int ID { get; set; }
         public string Make { get; set; }
         public string Model { get; set; }
         public int Year { get; set; }
         public string Color { get; set; }
         public double Price { get; set; }
 
-        public Car(string make, string model, int year, string color, double price)
+        public Car(int id, string make, string model, int year, string color, double price)
         {
-            Make = make;
-            Model = model;
-            Year = year;
-            Color = color;
-            Price = price;
+            /*
+            Add relevant code here
+            */
         }
+    }
+
+    public CarManager1()
+    {
+        cars = new List<Car>();
     }
 
     public void ManageCars()
     {
-        List<Car> cars = new List<Car>();
         const int numCars = 1000000; // Number of cars to create
 
         for (int i = 0; i < numCars; i++)
         {
-            Car car = new Car("Toyota", "Camry", 2020, "Red", 25000.00);
+            Car car = new Car(i, "Toyota", "Camry", 2020, "Red", 25000.00);
             cars.Add(car);
-            Console.WriteLine($"Car added: {car.Make} {car.Model} {car.Year}");
+            Console.WriteLine($"Car added: {car.ID} {car.Make} {car.Model} {car.Year}");
 
-            // Check if garbage collection is invoked
-            bool invoked = GarbageCollectionHelper.CheckGCStatus();
-            GarbageCollectionHelper.PrintGCStatus(invoked);
+            GarbageCollectionHelper.PrintGCStatus();
         }
+
+        // Explicitly dispose the car management object
+        Dispose();
+    }
+
+    public void Dispose()
+    {
+        
+        /*
+        Add relevant code here 
+        */ 
     }
 }
 
 public static class GarbageCollectionHelper
 {
-    public static void PrintGCStatus(bool invoked)
+    private static int checkInterval = 10000; // Adjust as needed
+    private static int carsProcessed = 0;
+
+    public static void PrintGCStatus()
     {
-        if (invoked)
+        carsProcessed++;
+        if (/*add your condition here*/)
         {
-            Console.WriteLine("Garbage collection: invoked");
-        }
-        else
-        {
-            Console.WriteLine("Garbage collection: not invoked");
+            bool invoked = CheckGCStatus();
+            if (invoked)
+            {
+                Console.WriteLine("Garbage collection: invoked");
+            }
+            else
+            {
+                Console.WriteLine("Garbage collection: not invoked");
+            }
         }
     }
 
@@ -104,9 +93,9 @@ public static class GarbageCollectionHelper
         temp = null;
 
         // Ensure these objects are collected
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
+        /*
+           Add relevant code here
+        */
 
         // Check if garbage collection is invoked
         return GC.GetTotalMemory(false) > 0;
@@ -119,8 +108,6 @@ class Program
     {
         ICarManagement carManagement;
 
-        // Uncomment the line corresponding to the desired behavior
-        //carManagement = new CarManager2();
         carManagement = new CarManager1();
 
         carManagement.ManageCars();
